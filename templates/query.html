@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台查询看板 | 智慧考勤系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        /* 头部样式 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(98deg, #1e2f4b 0%, #2c3e66 100%);
+            padding: 1.5rem 2rem;
+            border-radius: 1.5rem;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 2rem;
+        }
+        .header h1 { font-size: 1.5rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .admin-info { display: flex; align-items: center; gap: 15px; font-size: 0.95rem; }
+        .logout-btn {
+            background-color: #de3a3a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background-color: #b82e2e; }
+
+        /* 筛选工具栏 */
+        .filter-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label { font-weight: 600; color: #1e2f4b; font-size: 0.9rem; }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.75rem;
+            outline: none;
+            background-color: #f8fafc;
+        }
+        .form-control:focus { border-color: #3b5a8c; background-color: white; }
+        .search-btn {
+            background: linear-gradient(95deg, #2c3e66, #1f3a5f);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 46px;
+            transition: opacity 0.2s;
+        }
+         .search-btn:hover { opacity: 0.9; }
+ 
+        /* 状态徽标样式 */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-normal { background-color: #dcfce7; color: #16a34a; }
+        .status-late { background-color: #fef2f2; color: #dc2626; }
+        .status-excused { background-color: #fef9c3; color: #a16207; }
+ 
+        .status-select {
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+ 
+        .save-status-btn {
+            background: #3b5a8c;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-left: 0.3rem;
+        }
+        .save-status-btn:hover { background: #1e2f4b; }
+        .save-status-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+ 
+        .update-toast {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        .update-toast.success { background: #16a34a; color: white; }
+        .update-toast.error { background: #dc2626; color: white; }
+ 
+        /* 数据表格卡片 */
+        .data-card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .card-title {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #1e2f4b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-badge {
+            background-color: #e0eafc;
+            color: #1e2f4b;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        /* 响应式表格 */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 600px; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; padding: 1rem 1.5rem; font-size: 0.9rem; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 1rem 1.5rem; font-size: 0.95rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+        
+        /* 空状态提示 */
+        .no-data { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
+        .no-data i { font-size: 3rem; margin-bottom: 1rem; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-chart-pie"></i> 智慧考勤管理后台</h1>
+        <div class="admin-info">
+            <span><i class="fas fa-user-shield"></i> 管理员: <strong>{{ current_user }}</strong></span>
+            <a href="{{url_for('logout')}}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> 退出</a >
+        </div>
+    </div>
+
+    <div class="filter-card">
+        <form action="/query" method="GET" class="filter-form">
+            <div class="form-group">
+                <label><i class="far fa-calendar-alt"></i> 选择日期</label>
+                <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-business-time"></i> 选择班次</label>
+                <select name="shift" class="form-control">
+                    <option value="">-- 全部班次 --</option>
+                    <option value="一到二节课" {% if selected_shift == '一到二节课' %}selected{% endif %}>一到二节课</option>
+                    <option value="三到四节课" {% if selected_shift == '三到四节课' %}selected{% endif %}>三到四节课</option>
+                    <option value="五到六节课" {% if selected_shift == '五到六节课' %}selected{% endif %}>五到六节课</option>
+                    <option value="七到八节课" {% if selected_shift == '七到八节课' %}selected{% endif %}>七到八节课</option>
+                </select>
+            </div>
+            <button type="submit" class="search-btn">
+                <i class="fas fa-filter"></i> 筛选数据
+            </button>
+		<a href="/export_csv?date={{selected_date}}&shift={{selected_shift}}" class="search-btn" style="background: linear-gradient(95deg, #10b981, #059669); text-decoration: none;">
+		<i class="fas fa-file-csv"></i>导出CSV	
+		</a>
+        </form>
+    </div>
+
+    <div class="data-card">
+        <div class="card-title">
+            <span><i class="fas fa-list-ul"></i> 打卡记录明细</span>
+            <span class="total-badge">共找到 {{ records|length }} 条记录</span>
+        </div>
+        <div class="table-responsive">
+            {% if records %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>学号/编号</th>
+                        <th>姓名</th>
+                        <th>班次</th>
+                        <th>打卡日期</th>
+                        <th>打卡具体时间</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in records %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td><strong>{{ row[2] }}</strong></td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                        <td><i class="far fa-clock" style="color: #94a3b8; margin-right: 4px;"></i> {{ row[5] }}</td>
+                        <td>
+                            <span class="status-badge {% if row[6] == "迟到" %}status-late{% elif row[6] == "迟到（已提前报备）" %}status-excused{% else %}status-normal{% endif %}" id="status-text-{{ row[0] }}">{{ row[6] }}</span>
+                            <select class="status-select" id="status-select-{{ row[0] }}" style="display:none;">
+                                <option value="未迟到" {% if row[6] == "未迟到" %}selected{% endif %}>未迟到</option>
+                                <option value="迟到" {% if row[6] == "迟到" %}selected{% endif %}>迟到</option>
+                                <option value="迟到（已提前报备）" {% if row[6] == "迟到（已提前报备）" %}selected{% endif %}>迟到（已提前报备）</option>
+                            </select>
+                            <button class="save-status-btn" id="save-btn-{{ row[0] }}" style="display:none;" onclick="updateStatus({{ row[0] }})">保存</button>
+                            <button class="save-status-btn" style="display:none;background:#94a3b8;" onclick="cancelEdit({{ row[0] }})">取消</button>
+                            <button class="save-status-btn" id="edit-btn-{{ row[0] }}" onclick="editStatus({{ row[0] }})"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="no-data">
+                <i class="fas fa-folder-open"></i>
+                <p>暂无符合当前筛选条件的打卡数据</p >
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div id="updateToast" class="update-toast"></div>
+
+<script>
+function editStatus(recordId) {
+    document.getElementById('status-text-' + recordId).style.display = 'none';
+    document.getElementById('edit-btn-' + recordId).style.display = 'none';
+    document.getElementById('status-select-' + recordId).style.display = 'inline-block';
+    document.getElementById('save-btn-' + recordId).style.display = 'inline-block';
+    document.getElementById('cancel-btn-' + recordId).style.display = 'inline-block';
+}
+
+function cancelEdit(recordId) {
+    document.getElementById('status-text-' + recordId).style.display = 'inline-block';
+    document.getElementById('edit-btn-' + recordId).style.display = 'inline-block';
+    document.getElementById('status-select-' + recordId).style.display = 'none';
+    document.getElementById('save-btn-' + recordId).style.display = 'none';
+    document.getElementById('cancel-btn-' + recordId).style.display = 'none';
+}
+
+function showToast(message, type) {
+    const toast = document.getElementById('updateToast');
+    toast.textContent = message;
+    toast.className = 'update-toast ' + type;
+    toast.style.display = 'block';
+    setTimeout(function() { toast.style.display = 'none'; }, 3000);
+}
+
+function updateStatus(recordId) {
+    const select = document.getElementById('status-select-' + recordId);
+    const newStatus = select.value;
+    const saveBtn = document.getElementById('save-btn-' + recordId);
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中';
+    fetch('/update_status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + recordId + '&status=' + encodeURIComponent(newStatus)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showToast('状态已更新为: ' + newStatus, 'success');
+            const span = document.getElementById('status-text-' + recordId);
+            span.textContent = newStatus;
+            span.className = 'status-badge';
+            if (newStatus === '迟到') span.classList.add('status-late');
+            else if (newStatus === '迟到（已提前报备）') span.classList.add('status-excused');
+            else span.classList.add('status-normal');
+            cancelEdit(recordId);
+        } else {
+            showToast('更新失败: ' + data.message, 'error');
+            saveBtn.disabled = false;
+            saveBtn.textContent = '保存';
+        }
+    })
+    .catch(() => {
+        showToast('网络错误，请重试', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = '保存';
+    });
+}
+</script>
+
+</body>
+</html>

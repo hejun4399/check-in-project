@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 | 智慧考勤系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .card {
+            max-width: 420px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(98deg, #1e2f4b 0%, #2c3e66 100%);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+        .card-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .form-body { padding: 2rem; }
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1e2f4b;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .input-group label i { color: #3b5a8c; }
+        .input-field {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1rem;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: #3b5a8c;
+            box-shadow: 0 0 0 3px rgba(59, 90, 140, 0.15);
+        }
+        .error-msg {
+            color: #de3a3a;
+            background-color: #fdf2f2;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+            text-align: center;
+            border: 1px solid #fbd5d5;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #2c3e66, #1f3a5f);
+            border: none;
+            padding: 0.9rem;
+            border-radius: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .submit-btn:hover {
+            background: linear-gradient(95deg, #1f3252, #16273f);
+            transform: scale(0.99);
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .back-link a {
+            color: #3b5a8c;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="card-header">
+        <h1><i class="fas fa-lock"></i> 管理员登录</h1>
+    </div>
+    <div class="form-body">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="error-msg"><i class="fas fa-exclamation-circle"></i> {{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <!---"/admin"--->
+         <form action="/admin" method="POST">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> 账号</label>
+                <input type="text" name="username" class="input-field" placeholder="请输入管理员账号" required autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-key"></i> 密码</label>
+                <input type="password" name="password" class="input-field" placeholder="请输入密码" required>
+            </div>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-sign-in-alt"></i> 登录
+            </button>
+        </form>
+        <div class="back-link">
+            <a href="{{url_for('index')}}"><i class="fas fa-arrow-left"></i> 返回打卡页面</a >
+        </div>
+    </div>
+</div>
+</body>
+</html>

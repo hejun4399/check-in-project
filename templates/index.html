@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>部门打卡系统 | 智慧考勤</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css.min.all')}}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .card {
+            max-width: 560px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 8px 18px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            background: linear-gradient(98deg, #1e2f4b 0%, #2c3e66 100%);
+            padding: 1.8rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .card-header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .card-header h1 i {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .card-header p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 0.25rem;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.8rem;
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1e2f4b;
+            margin-bottom: 0.6rem;
+            font-size: 1rem;
+        }
+
+        .input-group label i {
+            font-size: 1.1rem;
+            color: #3b5a8c;
+            width: 1.4rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1rem;
+            background-color: #fefefe;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            outline: none;
+            color: #0f172a;
+        }
+
+        .input-field:focus {
+            border-color: #3b5a8c;
+            box-shadow: 0 0 0 3px rgba(59, 90, 140, 0.15);
+            background-color: #ffffff;
+        }
+
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233b5a8c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            margin-top: 2rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #2c3e66, #1f3a5f);
+            border: none;
+            padding: 0.9rem 1rem;
+            border-radius: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            font-family: inherit;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(95deg, #1f3252, #16273f);
+            transform: scale(0.98);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-timestamp {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b6e8c;
+            border-top: 1px solid #edf2f7;
+            padding-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 管理员入口（右下角悬浮） */
+        .admin-link {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+        }
+
+        .admin-link a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(44, 62, 102, 0.85);
+            backdrop-filter: blur(6px);
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.25s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-link a:hover {
+            background: #1e2f4b;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 500px) {
+            .card-header {
+                padding: 1.4rem 1.2rem;
+            }
+            .card-header h1 {
+                font-size: 1.5rem;
+            }
+            .form-body {
+                padding: 1.5rem;
+            }
+            .submit-btn {
+                padding: 0.75rem;
+                font-size: 1rem;
+            }
+            .admin-link a {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h1><i class="fas fa-fingerprint"></i> 部门打卡系统</h1>
+        <p><i class="fas fa-clock"></i> 精准考勤 · 便捷记录</p>
+    </div>
+
+    <div class="form-body">
+        <form id="attendanceForm" method="POST">
+            <div class="input-group">
+                <label><i class="fas fa-id-card"></i> 学号</label>
+                <input type="text" name="member_id" id="member_id" class="input-field"
+                       placeholder="请输入您的学号 (例如: 202430101234)" required autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label><i class="fas fa-calendar-alt"></i> 班次</label>
+                <select name="shift" id="shiftSelect" class="input-field" required>
+                    <option value="" disabled selected>—— 请选择上课班次 ——</option>
+                    <option value="一到二节课">📖 一到二节课 (上午第1-2节)</option>
+                    <option value="三到四节课">📚 三到四节课 (上午第3-4节)</option>
+                    <option value="五到六节课">🌤️ 五到六节课 (下午第5-6节)</option>
+                    <option value="七到八节课">🌙 七到八节课 (下午第7-8节)</option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-check-circle"></i> 提交打卡
+                </button>
+            </div>
+
+            <div class="info-timestamp">
+                <i class="far fa-calendar-check"></i>
+                <span id="liveDateTime">加载中...</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 管理员入口（独立于表单外） -->
+<div class="admin-link">
+    <a href="/admin" target="_self">
+        <i class="fas fa-sign-in-alt"></i> 管理员入口
+    </a>
+</div>
+
+<script>
+    // 实时日期时间
+    function updateDateTime() {
+        const now = new Date();
+        const dateTimeStr = now.toLocaleString('zh-CN', { hour12: false });
+        const el = document.getElementById('liveDateTime');
+        if (el) el.textContent = dateTimeStr;
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+</script>
+</body>
+</html>
